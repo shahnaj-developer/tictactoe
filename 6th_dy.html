@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum 6D Tic-Tac-Toe</title>
+<style>
+body {
+  margin:0;
+  background: radial-gradient(circle at center, #050510, #000);
+  color:#fff;
+  font-family:Segoe UI, sans-serif;
+  overflow:hidden;
+}
+
+h1 {
+  text-align:center;
+  color:#00fff7;
+  text-shadow:0 0 20px #00fff7;
+}
+
+#info { text-align:center; margin:8px; }
+
+.container {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:80vh;
+  perspective:1400px;
+}
+
+.hypercube {
+  position:relative;
+  transform-style:preserve-3d;
+  animation:float 6s infinite ease-in-out alternate;
+}
+
+@keyframes float {
+  from { transform: rotateX(-20deg) rotateY(20deg); }
+  to { transform: rotateX(-35deg) rotateY(60deg); }
+}
+
+.layer {
+  position:absolute;
+  display:grid;
+  grid-template-columns:repeat(3,70px);
+  grid-template-rows:repeat(3,70px);
+  gap:8px;
+}
+
+.cell {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  border-radius:14px;
+  font-size:1.6rem;
+  cursor:pointer;
+  backdrop-filter: blur(10px);
+  background:rgba(255,255,255,0.05);
+  box-shadow:0 0 10px rgba(0,255,255,0.2);
+  transition: all .25s;
+}
+
+.cell:hover {
+  transform:scale(1.2);
+  box-shadow:0 0 20px #00fff7;
+}
+
+.cell.x { color:#00eaff; text-shadow:0 0 10px #00eaff; }
+.cell.o { color:#ff2dfb; text-shadow:0 0 10px #ff2dfb; }
+
+.controls {
+  text-align:center;
+}
+
+button {
+  margin:6px;
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  background:#00fff7;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+<h1>Quantum 6D Tic-Tac-Toe</h1>
+<div id="info">Turn: X</div>
+
+<div class="container">
+  <div class="hypercube" id="cube"></div>
+</div>
+
+<div class="controls">
+  <button onclick="resetGame()">Reset</button>
+  <button onclick="toggleQuantum()">Quantum Mode</button>
+</div>
+
+<script>
+const SIZE = 3;
+const cube = document.getElementById('cube');
+const info = document.getElementById('info');
+
+let quantumMode = false;
+let board = createBoard();
+let current = 'x';
+let gameOver = false;
+
+function createBoard(){
+  return Array.from({length:SIZE},()=>
+    Array.from({length:SIZE},()=>
+      Array.from({length:SIZE},()=>[])));
+}
+
+// build layers
+for(let z=0; z<SIZE; z++){
+  const layer = document.createElement('div');
+  layer.className='layer';
+  layer.style.transform = `translateZ(${(z-1)*90}px)`;
+
+  for(let y=0;y<SIZE;y++){
+    for(let x=0;x<SIZE;x++){
+      const cell=document.createElement('div');
+      cell.className='cell';
+      cell.onclick=()=>move(x,y,z,cell);
+      layer.appendChild(cell);
+    }
+  }
+  cube.appendChild(layer);
+}
+
+function move(x,y,z,el){
+  if(gameOver) return;
+
+  if(quantumMode){
+    board[z][y][x].push(current);
+    el.textContent = board[z][y][x].join('');
+  } else {
+    if(board[z][y][x].length) return;
+    board[z][y][x] = [current];
+    el.textContent=current.toUpperCase();
+  }
+
+  el.classList.add(current);
+
+  if(checkWin(current)){
+    info.textContent = current.toUpperCase()+" WINS";
+    gameOver=true;
+    return;
+  }
+
+  current = current==='x'?'o':'x';
+  info.textContent = "Turn: "+current.toUpperCase();
+}
+
+// hyper-logic win detection
+function checkWin(p){
+  const lines=[];
+
+  for(let x=0;x<3;x++)
+  for(let y=0;y<3;y++){
+    lines.push([[0,y,x],[1,y,x],[2,y,x]]);
+    lines.push([[y,0,x],[y,1,x],[y,2,x]]);
+    lines.push([[y,x,0],[y,x,1],[y,x,2]]);
+  }
+
+  for(let i=0;i<3;i++){
+    lines.push([[i,0,0],[i,1,1],[i,2,2]]);
+    lines.push([[i,0,2],[i,1,1],[i,2,0]]);
+    lines.push([[0,i,0],[1,i,1],[2,i,2]]);
+    lines.push([[0,i,2],[1,i,1],[2,i,0]]);
+    lines.push([[0,0,i],[1,1,i],[2,2,i]]);
+    lines.push([[0,2,i],[1,1,i],[2,0,i]]);
+  }
+
+  lines.push([[0,0,0],[1,1,1],[2,2,2]]);
+  lines.push([[0,0,2],[1,1,1],[2,2,0]]);
+  lines.push([[0,2,0],[1,1,1],[2,0,2]]);
+  lines.push([[0,2,2],[1,1,1],[2,0,0]]);
+
+  return lines.some(line =>
+    line.every(([z,y,x]) => board[z][y][x].includes(p)));
+}
+
+function resetGame(){
+  board=createBoard();
+  gameOver=false;
+  current='x';
+  info.textContent='Turn: X';
+  document.querySelectorAll('.cell').forEach(c=>{
+    c.textContent='';
+    c.classList.remove('x','o');
+  });
+}
+
+function toggleQuantum(){
+  quantumMode=!quantumMode;
+  info.textContent = quantumMode ? "Quantum Mode ON" : "Quantum Mode OFF";
+}
+
+// mouse rotation
+// --- AUTO ROTATION + CURSOR CONTROL ---
+let down = false, sx = 0, sy = 0;
+let rotX = -25;
+let rotY = 40;
+let userActive = false;
+
+// auto motion (always running)
+function animate(){
+  if(!userActive){
+    rotY += 0.15; // slow spin
+    rotX += Math.sin(Date.now()/800)*0.03; // subtle motion
+  }
+  cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  requestAnimationFrame(animate);
+}
+animate();
+
+// user drag control
+cube.onmousedown = e=>{
+  down = true;
+  userActive = true;
+  sx = e.clientX;
+  sy = e.clientY;
+};
+
+document.onmouseup = ()=>{
+  down = false;
+  setTimeout(()=> userActive = false, 1200); // return to auto
+};
+
+document.onmousemove = e=>{
+  if(!down) return;
+
+  const dx = e.clientX - sx;
+  const dy = e.clientY - sy;
+
+  rotY += dx * 0.4;
+  rotX -= dy * 0.4;
+
+  sx = e.clientX;
+  sy = e.clientY;
+};
+</script>
+</body>
+</html>

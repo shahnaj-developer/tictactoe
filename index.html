@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body {
+      height: 100vh;
+      background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
+      overflow: hidden;
+      color: white;
+      cursor: none;
+      perspective: 1200px; /* 3D camera */
+    }
+
+    /* AAA INTRO */
+    .intro {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .logo {
+      font-size: 3.5rem;
+      letter-spacing: 8px;
+      opacity: 0;
+      transform: translateZ(-500px) scale(0.3);
+      color: #f5f5f5; /* soft white, not pure */
+      text-shadow: 0 0 10px rgba(255,255,255,0.25), 0 0 30px rgba(255,255,255,0.15);
+      animation: logoZoom 2.5s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+
+    @keyframes logoZoom {
+      0% { opacity: 0; transform: translateZ(-800px) scale(0.2); }
+      60% { opacity: 1; transform: translateZ(150px) scale(1.2); }
+      100% { transform: translateZ(0) scale(1); }
+    }
+
+    /* Particle Explosion with trails */
+    .explosion span {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0;
+      filter: blur(0.5px);
+      animation: explode 2.5s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+
+    .explosion span::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 20px;
+      background: rgba(255,255,255,0.4);
+      top: 0;
+      left: 1px;
+      filter: blur(2px);
+      transform-origin: top;
+    }
+
+    @keyframes explode {
+      0% {
+        transform: translate3d(0,0,0) scale(1);
+        opacity: 1;
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate3d(var(--x), var(--y), var(--z)) scale(0.2);
+        opacity: 0;
+      }
+    }
+
+    .intro.flash {
+      animation: flash 0.4s ease;
+    }
+
+    @keyframes flash {
+      0% { background: white; }
+      100% { background: black; }
+    }
+
+    .intro.hide {
+      animation: fadeOut 1s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    /* Existing styles unchanged */
+    .cursor {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      pointer-events: none;
+      z-index: 999;
+      mix-blend-mode: difference;
+    }
+
+    .transition {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: black;
+      top: 0;
+      left: 0;
+      transform: scaleY(0);
+      transform-origin: top;
+      z-index: 1000;
+      transition: transform 0.6s ease;
+    }
+
+    .particles { position: absolute; width: 100%; height: 100%; overflow: hidden; z-index: 0; }
+    .particles span {
+      position: absolute;
+      display: block;
+      width: 5px; height: 5px;
+      background: white;
+      animation: float 10s linear infinite;
+      opacity: 0.5;
+      border-radius: 50%;
+    }
+
+    @keyframes float {
+      from { transform: translateY(100vh) scale(0); }
+      to { transform: translateY(-10vh) scale(1); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+      to { text-shadow: 0 0 25px rgba(255,255,255,0.8); }
+    }
+
+    .buttons { display: flex; gap: 40px; margin-top: 30px; }
+
+    .card {
+      width: 260px;
+      height: 160px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.7;
+      transition: 0.4s;
+    }
+
+    .card:hover img { opacity: 1; transform: scale(1.1); }
+
+    .card span {
+      position: absolute;
+      bottom: 10px;
+      left: 15px;
+      font-weight: 500;
+      z-index: 2;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="intro" id="intro">
+  <div class="explosion" id="explosion"></div>
+  <div class="logo">SHAHNAJ STUDIOS</div>
+</div>
+
+<div class="transition" id="transition"></div>
+<div class="cursor" id="cursor"></div>
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <h1>🎮 My Game Portfolio</h1>
+  <p>Choose a game</p>
+
+  <div class="buttons">
+    <div class="card" onclick="goTo('6th_dy.html')">
+      <img src="6th_dy.png" />
+      <span>Game 1</span>
+    </div>
+    <div class="card" onclick="goTo('adai.html')">
+      <img src="adai.png" />
+      <span>Game 2</span>
+    </div>
+  </div>
+</div>
+
+<footer>Accept my proposal so I can finally stop pretending I enjoy being poor.</footer>
+
+<script>
+  // PARTICLE EXPLOSION (3D)
+  const explosion = document.getElementById('explosion');
+  for (let i = 0; i < 140; i++) {
+    const p = document.createElement('span');
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = Math.random() * 400 + 100;
+    const x = Math.cos(angle) * distance + 'px';
+    const y = Math.sin(angle) * distance + 'px';
+    const z = (Math.random() - 0.5) * 600 + 'px';
+    p.style.setProperty('--x', x);
+    p.style.setProperty('--y', y);
+    p.style.setProperty('--z', z);
+    explosion.appendChild(p);
+  }
+
+  // INTRO TIMELINE
+  window.addEventListener('load', () => {
+    
+
+    setTimeout(() => {
+      document.getElementById('intro').classList.add('hide');
+    }, 2250);
+  });
+
+  // Existing scripts unchanged
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 50; i++) {
+    const span = document.createElement('span');
+    span.style.left = Math.random() * 100 + 'vw';
+    span.style.animationDuration = 5 + Math.random() * 10 + 's';
+    span.style.opacity = Math.random();
+    span.style.width = span.style.height = Math.random() * 4 + 2 + 'px';
+    container.appendChild(span);
+  }
+
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+
+  const hoverSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      hoverSound.currentTime = 0;
+      hoverSound.play();
+    });
+  });
+
+  function goTo(page) {
+    const transition = document.getElementById('transition');
+    transition.style.transform = 'scaleY(1)';
+    setTimeout(() => {
+      window.location.href = page;
+    }, 600);
+  }
+</script>
+
+</body>
+</html>
