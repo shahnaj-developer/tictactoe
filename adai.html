@@ -94,14 +94,14 @@
   <div class="controls">
     <button onclick="toggleMode()" id="modeBtn">Mode: 1P vs AI</button>
     <button onclick="toggleDifficulty()" id="difficultyBtn">Difficulty: Easy</button>
-    <button onclick="toggleSound()" id="soundBtn">Sound: On</button>
+    <button onclick="toggleSound()" id="soundBtn">music: On</button>
   </div>
   <div class="board" id="board"></div>
   <button id="restartBtn" onclick="restartGame()">Restart Game</button>
 
   <audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
   <audio id="winSound" src="https://www.soundjay.com/button/sounds/button-4.mp3"></audio>
-  <audio id="bgMusic" src="https://www.fesliyanstudios.com/play-mp3/387" loop autoplay></audio>
+  <audio id="bgMusic" src="music.mp3" loop autoplay></audio>
 
   <script>
     const board = document.getElementById('board');
